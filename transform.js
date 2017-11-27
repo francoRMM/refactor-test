@@ -22,7 +22,6 @@ function json(value, successHandler, errorHandler) {
 
 function transform(callback) {
   json('./from.json', function(data) {
-    data = JSON.parse(data);
     var schema = {};
     schema.data = {};
 
@@ -62,6 +61,6 @@ function transform(callback) {
       }
     }
 
-    callback(data);
+    callback(schema);
   });
 }
