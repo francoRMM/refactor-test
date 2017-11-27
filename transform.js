@@ -1,66 +1,66 @@
 function json(value, successHandler, errorHandler) {
-  var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+	let xhr = typeof XMLHttpRequest !== 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
 
-  xhr.open('get', value, true);
-  xhr.onreadystatechange = function() {
-    var status;
-    var data;
-    // https://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
-    if (xhr.readyState == 4) {
-      // `DONE`
-      status = xhr.status;
-      if (status == 200) {
-        data = JSON.parse(xhr.responseText);
-        successHandler && successHandler(data);
-      } else {
-        errorHandler && errorHandler(status);
-      }
-    }
-  };
-  xhr.send();
+	xhr.open('get', value, true);
+	xhr.onreadystatechange = function () {
+		let status;
+		let data;
+		// https://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
+		if (xhr.readyState === 4) {
+			// `DONE`
+			status = xhr.status;
+			if (status === 200) {
+				data = JSON.parse(xhr.responseText);
+				successHandler && successHandler(data);
+			} else {
+				errorHandler && errorHandler(status);
+			}
+		}
+	};
+	xhr.send();
 }
 
 function transform(callback) {
-  json('./from.json', function(data) {
-    var schema = {};
-    schema.data = {};
+	json('./from.json', data => {
+		let schema = {};
+		schema.data = {};
 
-    for (var propName in data) {
-      schema.data[propName] = data[propName];
+		Object.keys(data).forEach(propName => {
+			schema.data[propName] = data[propName];
 
-      if (propName === 'properties') {
-        schema.data[propName] = [];
+			if (propName === 'properties') {
+				schema.data[propName] = [];
 
-        for (var subPropName in data[propName]) {
-          var subSchema = {};
+				for (let subPropName in data[propName]) {
+					let subSchema = {};
 
-          subSchema.name = subPropName;
+					subSchema.name = subPropName;
 
-          for (var subSubPropName in data[propName][subPropName]) {
-            subSchema[subSubPropName] = data[propName][subPropName][subSubPropName];
+					for (let subSubPropName in data[propName][subPropName]) {
+						subSchema[subSubPropName] = data[propName][subPropName][subSubPropName];
 
-            if (subSubPropName === 'properties') {
-              subSchema[subSubPropName] = [];
+						if (subSubPropName === 'properties') {
+							subSchema[subSubPropName] = [];
 
-              for (var subSubSubPropName in data[propName][subPropName][subSubPropName]) {
-                var obj = {};
+							for (let subSubSubPropName in data[propName][subPropName][subSubPropName]) {
+								let obj = {};
 
-                subSchema.name = subSubSubPropName;
+								subSchema.name = subSubSubPropName;
 
-                for (var subSubSubSubPropName in data[propName][subPropName][subSubPropName][subSubSubPropName]) {
-                  obj[subSubSubSubPropName] = data[propName][subPropName][subSubPropName][subSubSubPropName][subSubSubSubPropName];
-                }
+								for (let subSubSubSubPropName in data[propName][subPropName][subSubPropName][subSubSubPropName]) {
+									obj[subSubSubSubPropName] = data[propName][subPropName][subSubPropName][subSubSubPropName][subSubSubSubPropName];
+								}
 
-                subSchema[subSubPropName].push(obj);
-              }
-            }
-          }
+								subSchema[subSubPropName].push(obj);
+							}
+						}
+					}
 
-          schema.data[propName].push(subSchema);
-        }
-      }
-    }
+					schema.data[propName].push(subSchema);
+				}
+			}
+		});
 
-    callback(schema);
-  });
+		callback(schema);
+	});
 }
