@@ -6,9 +6,9 @@ const cpyProps = obj => {
 	return Object.keys(obj).reduce((acc, key) => {
 		return {
 			...acc, ...{
-				[key]: key === 'properties' || key === 'examples' ?
+				[key]: key === 'properties'?
 					objToArr(cpyProps(obj[key])) :
-					typeof obj[key] === 'object' ?
+					Object.prototype.toString.call(obj[key])==="[object Object]"?
 						cpyProps(obj[key]) :
 						obj[key]
 			}
@@ -17,7 +17,7 @@ const cpyProps = obj => {
 };
 
 const json = (file, successHandler, errorHandler) => {
-	return fetch(file).then((res) => {
+	return fetch(file).then(res => {
 			if (res.ok)
 				return res.json();
 			throw new Error('Connection Error');
@@ -26,7 +26,7 @@ const json = (file, successHandler, errorHandler) => {
 		.catch(error => errorHandler & errorHandler(error));
 };
 
-const transform = (callback) => {
+const transform = callback => {
 	json('./from.json', data => callback({data: cpyProps(data)}));
 };
 
