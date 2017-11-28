@@ -1,14 +1,10 @@
-const objToArr = obj => {
-	return Object.keys(obj).reduce((acc, cur) => [...acc, obj[cur]], []);
-};
-
 const cpyProps = obj => {
-	return Object.keys(obj).reduce((acc, key) => {
+	Object.keys(obj).reduce((acc, key) => {
 		return {
 			...acc, ...{
-				[key]: key === 'properties'?
-					objToArr(cpyProps(obj[key])) :
-					Object.prototype.toString.call(obj[key])==="[object Object]"?
+				[key]: key === 'properties' ?
+					Object.values(cpyProps(obj[key])) :
+					Object.prototype.toString.call(obj[key]) === "[object Object]" ?
 						cpyProps(obj[key]) :
 						obj[key]
 			}
@@ -16,17 +12,16 @@ const cpyProps = obj => {
 	}, {});
 };
 
-const json = (file, successHandler, errorHandler) => {
-	return fetch(file).then(res => {
+const json = (file, successHandler, errorHandler = (err) => { throw err}) => {
+	fetch(file).then(res => {
 			if (res.ok)
 				return res.json();
 			throw new Error('Connection Error');
 		})
-		.then(data => successHandler & successHandler(data))
-		.catch(error => errorHandler & errorHandler(error));
+		.then(data => successHandler && successHandler(data))
+		.catch(err => errorHandler(err));
 };
 
 const transform = callback => {
 	json('./from.json', data => callback({data: cpyProps(data)}));
 };
-
