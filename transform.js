@@ -16,31 +16,17 @@ const cpyProps = obj => {
 	}, {});
 };
 
-function json(value, successHandler, errorHandler) {
-	let xhr = typeof XMLHttpRequest !== 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+const json = (file, successHandler, errorHandler) => {
+	return fetch(file).then((res) => {
+			if (res.ok)
+				return res.json();
+			throw new Error('Connection Error');
+		})
+		.then(data => successHandler & successHandler(data))
+		.catch(error => errorHandler & errorHandler(error));
+};
 
-	xhr.open('get', value, true);
-	xhr.onreadystatechange = function () {
-		let status;
-		let data;
-		// https://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
-		if (xhr.readyState === 4) {
-			// `DONE`
-			status = xhr.status;
-			if (status === 200) {
-				data = JSON.parse(xhr.responseText);
-				successHandler && successHandler(data);
-			} else {
-				errorHandler && errorHandler(status);
-			}
-		}
-	};
-	xhr.send();
-}
-
-function transform(callback) {
-	json('./from.json', data => {
-		callback({data: cpyProps(data)});
-	});
-}
+const transform = (callback) => {
+	json('./from.json', data => callback({data: cpyProps(data)}));
+};
 
