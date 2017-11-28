@@ -12,14 +12,12 @@ const cpyProps = obj => {
 	}, {});
 };
 
-const json = (file, successHandler, errorHandler = (err) => { throw err}) => {
-	fetch(file).then(res => {
-			if (res.ok)
-				return res.json();
-			throw new Error('Connection Error');
-		})
-		.then(data => successHandler && successHandler(data))
-		.catch(err => errorHandler(err));
+const json = async (file, successHandler, errorHandler = err => console.error(err)) => {
+	try {
+		successHandler(await(await fetch(file)).json());
+	} catch (err) {
+		errorHandler(err);
+	}
 };
 
 const transform = callback => {
