@@ -1,3 +1,21 @@
+const objToArr = obj => {
+	return Object.keys(obj).reduce((acc, cur) => [...acc, obj[cur]], []);
+};
+
+const cpyProps = obj => {
+	return Object.keys(obj).reduce((acc, key) => {
+		return {
+			...acc, ...{
+				[key]: key === 'properties' || key === 'examples' ?
+					objToArr(cpyProps(obj[key])) :
+					typeof obj[key] === 'object' ?
+						cpyProps(obj[key]) :
+						obj[key]
+			}
+		}
+	}, {});
+};
+
 function json(value, successHandler, errorHandler) {
 	let xhr = typeof XMLHttpRequest !== 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
 
@@ -22,45 +40,7 @@ function json(value, successHandler, errorHandler) {
 
 function transform(callback) {
 	json('./from.json', data => {
-		let schema = {};
-		schema.data = {};
-
-		Object.keys(data).forEach(propName => {
-			schema.data[propName] = data[propName];
-
-			if (propName === 'properties') {
-				schema.data[propName] = [];
-
-				for (let subPropName in data[propName]) {
-					let subSchema = {};
-
-					subSchema.name = subPropName;
-
-					for (let subSubPropName in data[propName][subPropName]) {
-						subSchema[subSubPropName] = data[propName][subPropName][subSubPropName];
-
-						if (subSubPropName === 'properties') {
-							subSchema[subSubPropName] = [];
-
-							for (let subSubSubPropName in data[propName][subPropName][subSubPropName]) {
-								let obj = {};
-
-								subSchema.name = subSubSubPropName;
-
-								for (let subSubSubSubPropName in data[propName][subPropName][subSubPropName][subSubSubPropName]) {
-									obj[subSubSubSubPropName] = data[propName][subPropName][subSubPropName][subSubSubPropName][subSubSubSubPropName];
-								}
-
-								subSchema[subSubPropName].push(obj);
-							}
-						}
-					}
-
-					schema.data[propName].push(subSchema);
-				}
-			}
-		});
-
-		callback(schema);
+		callback({data: cpyProps(data)});
 	});
 }
+
