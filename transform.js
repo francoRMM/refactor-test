@@ -1,5 +1,5 @@
 const cpyProps = obj => {
-	Object.keys(obj).reduce((acc, key) => {
+	return Object.keys(obj).reduce((acc, key) => {
 		return {
 			...acc, ...{
 				[key]: key === 'properties' ?
