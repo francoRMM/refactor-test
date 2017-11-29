@@ -13,7 +13,6 @@ const cpyObj = obj =>
 		}
 	}), {});
 
-
 // I wanted to keep json and transform interfaces
 const json = async (file, successHandler, errorHandler = err => console.error(err)) => {
 	try {
