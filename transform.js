@@ -13,14 +13,11 @@ const cpyObj = obj =>
 		}
 	}), {});
 
-// I wanted to keep json and transform interfaces
-const json = async (file, successHandler, errorHandler = err => console.error(err)) => {
-	try {
-		successHandler(await(await fetch(file)).json());
-	} catch (err) {
-		errorHandler(err);
-	}
-};
+// I wanted to keep json and transform and theirs interfaces
+const json = (file, successHandler, errorHandler = err => console.error(err)) =>
+	(async () => await(await fetch(file)).json())()
+		.then(data => successHandler(data))
+		.catch(err => errorHandler(err));
 
 const transform = callback => {
 	json('./from.json', data => callback({data: cpyObj(data)}));
